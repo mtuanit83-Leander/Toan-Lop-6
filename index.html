@@ -279,7 +279,19 @@ exam.tu_luan.forEach((t, index) => {
 let totalLines = 4;
 if (t.solution) {
 let actualLines = 0;
-const textBlocks = t.solution.split(/<li[^>]*>|<br[^>]*>/gi).filter(l => l.trim().length > 0);
+// Lọc nội dung để đếm: Đếm từ "tóm tắt", nếu không có thì đếm từ "bài giải"
+let textToCount = t.solution;
+const lowerSol = t.solution.toLowerCase();
+let startIndex = lowerSol.indexOf('tóm tắt');
+if (startIndex !== -1) {
+textToCount = t.solution.substring(startIndex);
+} else {
+startIndex = lowerSol.indexOf('bài giải');
+if (startIndex !== -1) {
+textToCount = t.solution.substring(startIndex);
+}
+}
+const textBlocks = textToCount.split(/<li[^>]*>|<br[^>]*>/gi).filter(l => l.trim().length > 0);
 textBlocks.forEach(block => {
 let blockHeight = 1;
 if (/\\dfrac/g.test(block)) blockHeight += 1;
@@ -291,12 +303,11 @@ const visualLength = cleanText.length;
 if (visualLength > 85) blockHeight += Math.floor(visualLength / 85);
 actualLines += blockHeight;
 });
-const hasSvg = /<svg/i.test(t.solution) || /<svg/i.test(t.t_content);
-if (hasSvg) actualLines += 8;
+// Đã xóa thuật toán cộng 8 dòng cho SVG vì tính năng Auto-fill (Lấp đầy trang in) đã lo việc này
 if (actualLines === 0) actualLines = 3;
 totalLines = actualLines + 2;
 }
-const lineSize = 28;
+const lineSize = 25;
 const baiGiaiHeight = totalLines * lineSize;
 // Gom tiêu đề Phần 2 vào chung khối với Bài 1 để không bị rớt dòng mồ côi khi in
 let part2Header = index === 0 ? `<h3 class="text-2xl font-bold text-indigo-700 border-b-2 border-indigo-100 pb-2 mb-6 uppercase">Phần 2: Tự luận</h3>` : ``;
